@@ -1,0 +1,11 @@
+{
+  "country": "GB",
+  "types": [
+    "line",
+    "minor_line"
+  ],
+  "feature_count": 224149,
+  "file_size_mb": 114.0,
+  "source": "OpenStreetMap (Overpass API)",
+  "fetched_at": "2026-07-03T19:28:15Z"
+}

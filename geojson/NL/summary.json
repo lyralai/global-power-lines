@@ -1,0 +1,11 @@
+{
+  "country": "NL",
+  "types": [
+    "line",
+    "minor_line"
+  ],
+  "feature_count": 16195,
+  "file_size_mb": 6.7,
+  "source": "OpenStreetMap (Overpass API)",
+  "fetched_at": "2026-07-03T19:29:15Z"
+}
