@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Global Power Lines — Netherlands</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    body { margin: 0; padding: 0; background: #0a0a0a; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; background: #0a0a0a; }
+    #header {
+      position: absolute; top: 0; left: 0; right: 0; z-index: 1000;
+      background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+      padding: 16px 20px 32px; pointer-events: none;
+    }
+    #header h1 {
+      margin: 0; font: 700 18px -apple-system, system-ui, sans-serif;
+      color: #ff6b35; letter-spacing: -0.3px;
+    }
+    #header p {
+      margin: 2px 0 0; font: 400 12px -apple-system, system-ui, sans-serif;
+      color: #888;
+    }
+    #legend {
+      position: absolute; bottom: 20px; left: 20px; z-index: 1000;
+      background: rgba(0,0,0,0.85); border: 1px solid #333;
+      padding: 12px 16px; border-radius: 8px;
+      font: 12px/1.6 -apple-system, system-ui, sans-serif; color: #ccc;
+    }
+    .legend-row { display: flex; align-items: center; gap: 8px; margin: 2px 0; }
+    .legend-line { width: 24px; height: 2px; border-radius: 1px; }
+    #stats {
+      position: absolute; top: 20px; right: 20px; z-index: 1000;
+      background: rgba(0,0,0,0.85); border: 1px solid #333;
+      padding: 10px 14px; border-radius: 8px;
+      font: 12px/1.5 -apple-system, system-ui, sans-serif; color: #aaa;
+    }
+    #stats b { color: #ff6b35; }
+  </style>
+</head>
+<body>
+<div id="header">
+  <h1>Global Power Lines — Netherlands</h1>
+  <p>16,195 features from OpenStreetMap · Transmission & Distribution</p>
+</div>
+<div id="map"></div>
+<div id="legend">
+  <div class="legend-row"><div class="legend-line" style="background:#ff6b35;"></div> Transmission (high voltage)</div>
+  <div class="legend-row"><div class="legend-line" style="background:#ffd23f;opacity:0.5;"></div> Distribution (minor)</div>
+</div>
+<div id="stats"><b id="count">0</b> lines loaded</div>
+<script>
+  const MAPBOX_TOKEN = localStorage.getItem('mapbox_token') || '';
+
+  const map = L.map('map', {
+    center: [52.1, 5.3],
+    zoom: 8,
+    zoomControl: false,
+    attributionControl: true
+  });
+
+  L.control.zoom({ position: 'topright' }).addTo(map);
+
+  // Mapbox dark basemap (falls back to CARTO if no token)
+  const tileUrl = MAPBOX_TOKEN
+    ? 'https://api.mapbox.com/styles/v1/mapbox/dark-v11/tiles/{z}/{x}/{y}?access_token=' + MAPBOX_TOKEN
+    : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+
+  L.tileLayer(tileUrl, {
+    attribution: '© OpenStreetMap' + (MAPBOX_TOKEN ? ' © Mapbox' : ' © CARTO'),
+    maxZoom: 19,
+    subdomains: MAPBOX_TOKEN ? undefined : 'abcd',
+    tileSize: MAPBOX_TOKEN ? 512 : 256,
+    zoomOffset: MAPBOX_TOKEN ? -1 : 0
+  }).addTo(map);
+
+  fetch('power_lines_nl.geojson')
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('count').textContent = data.features.length.toLocaleString();
+
+      // Transmission lines — bright orange
+      const transmission = L.geoJSON(data, {
+        filter: f => f.properties.power_type === 'line',
+        style: { color: '#ff6b35', weight: 2, opacity: 0.85 },
+        onEachFeature: (feature, layer) => {
+          const p = feature.properties;
+          layer.bindPopup(
+            '<b>' + (p.name || 'Transmission Line') + '</b><br>' +
+            'Voltage: ' + (p.voltage || 'unknown') + ' kV<br>' +
+            'Operator: ' + (p.operator || 'unknown') + '<br>' +
+            'Cables: ' + (p.cables || 'unknown')
+          );
+        }
+      }).addTo(map);
+
+      // Distribution lines — dim yellow, only when zoomed in
+      const distribution = L.geoJSON(data, {
+        filter: f => f.properties.power_type === 'minor_line',
+        style: { color: '#ffd23f', weight: 0.8, opacity: 0.35 }
+      }).addTo(map);
+
+      map.on('zoom', () => {
+        if (map.getZoom() < 11) {
+          if (map.hasLayer(distribution)) map.removeLayer(distribution);
+        } else {
+          if (!map.hasLayer(distribution)) map.addLayer(distribution);
+        }
+      });
+      if (map.getZoom() < 11) map.removeLayer(distribution);
+    });
+</script>
+</body>
+</html>
