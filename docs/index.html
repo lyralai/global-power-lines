@@ -189,8 +189,49 @@ function hideLoading() {
   document.getElementById('loading').style.display = 'none';
 }
 
+// Files tracked with Git LFS — need media.githubusercontent.com instead of raw
+const LFS_FILES = new Set([
+  'geojson/CN/power_lines_cn.geojson',
+  'geojson/FR/power_minor_lines_fr.geojson',
+  'geojson/FR/power_substations_fr.geojson',
+  'geojson/GB/power_lines_gb.geojson',
+]);
+
+// Large files that could crash the browser — warn before loading
+const LARGE_FILES = new Set([
+  'geojson/CN/power_lines_cn.geojson',   // 232 MB
+  'geojson/FR/power_minor_lines_fr.geojson', // 138 MB
+  'geojson/FR/power_substations_fr.geojson', // 121 MB
+  'geojson/GB/power_lines_gb.geojson',       // 114 MB
+  'geojson/DE/power_lines_de.geojson',       // 94 MB
+  'geojson/CA/power_lines_ca.geojson',       // 96 MB
+  'geojson/CA/power_minor_lines_ca.geojson', // 97 MB
+  'geojson/PL/power_lines_pl.geojson',       // 83 MB
+  'geojson/DE/power_substations_de.geojson', // 63 MB
+  'geojson/ES/power_lines_es.geojson',       // 67 MB
+  'geojson/IN/power_lines_in.geojson',       // 67 MB
+]);
+
+function layerFilename(country, layer) {
+  const fileMap = {
+    line: `power_lines_${country.toLowerCase()}.geojson`,
+    minor_line: `power_minor_lines_${country.toLowerCase()}.geojson`,
+    substation: `power_substations_${country.toLowerCase()}.geojson`,
+    plant: `power_plants_${country.toLowerCase()}.geojson`,
+  };
+  return fileMap[layer] || '';
+}
+
+function largeFileSize(layer, cc) {
+  const sizes = {
+    'CN:line': 232, 'FR:minor_line': 138, 'FR:substation': 121,
+    'GB:line': 114, 'DE:line': 94, 'CA:line': 96, 'CA:minor_line': 97,
+    'PL:line': 83, 'DE:substation': 63, 'ES:line': 67, 'IN:line': 67,
+  };
+  return sizes[`${cc}:${layer}`] || '?';
+}
+
 function geojsonUrl(country, layer) {
-  // Use raw.githubusercontent.com for reliable access
   const repo = 'lyralai/global-power-lines';
   const branch = 'master';
   const fileMap = {
@@ -202,19 +243,44 @@ function geojsonUrl(country, layer) {
   const path = country === 'US'
     ? `geojson/US/${fileMap[layer]}`
     : `geojson/${country}/${fileMap[layer]}`;
+  // LFS files need media.githubusercontent.com — raw returns pointer text
+  if (LFS_FILES.has(path)) {
+    return `https://media.githubusercontent.com/media/${repo}/${branch}/${path}`;
+  }
   return `https://raw.githubusercontent.com/${repo}/${branch}/${path}`;
 }
 
 async function loadCountry(country) {
-  clearLoading: clearMap();
+  clearMap();
 
   const cc = country;
   const name = CC_TO_NAME[cc] || cc;
-  showLoading(`Loading ${name}...`);
 
-  const layers = cc === 'US'
-    ? ['line', 'substation', 'plant']  // Skip minor_line for US (too big, use regions)
+  // Determine which layers to load
+  let layers = cc === 'US'
+    ? ['line', 'substation', 'plant']
     : ['line', 'minor_line', 'substation', 'plant'];
+
+  // Warn about large files and let user decide which layers to skip
+  const largeLayers = [];
+  for (const layer of layers) {
+    const path = cc === 'US'
+      ? `geojson/US/${layerFilename(cc, layer)}`
+      : `geojson/${cc}/${layerFilename(cc, layer)}`;
+    if (LARGE_FILES.has(path)) {
+      largeLayers.push({ layer, path, sizeMB: largeFileSize(layer, cc) });
+    }
+  }
+
+  if (largeLayers.length > 0) {
+    const sizeStr = largeLayers.map(l => `${l.layer} (~${l.sizeMB} MB)`).join(', ');
+    if (!confirm(`${name} has large data layers (${sizeStr}).\n\nLoading these may be slow. Click OK to load everything, or Cancel to load only lighter layers (transmission lines + points).`)) {
+      // Remove the heavy layers
+      layers = layers.filter(l => !largeLayers.some(ll => ll.layer === l));
+    }
+  }
+
+  showLoading(`Loading ${name}...`);
 
   let totalFeatures = 0;
   let loadedLayers = 0;
@@ -222,12 +288,19 @@ async function loadCountry(country) {
   for (const layer of layers) {
     const url = geojsonUrl(cc, layer);
     try {
+      showLoading(`Loading ${name} — ${layer}...`);
       const resp = await fetch(url);
       if (!resp.ok) {
         console.warn(`${layer}: HTTP ${resp.status}`);
         continue;
       }
-      const data = await resp.json();
+      const text = await resp.text();
+      // Check for LFS pointer
+      if (text.startsWith('version https://git-lfs')) {
+        console.warn(`${layer}: got LFS pointer, skipping`);
+        continue;
+      }
+      const data = JSON.parse(text);
       if (!data.features || data.features.length === 0) continue;
 
       totalFeatures += data.features.length;
