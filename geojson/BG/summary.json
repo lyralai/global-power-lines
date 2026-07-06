@@ -1,0 +1,39 @@
+{
+  "country": "BG",
+  "bbox": [
+    22.3,
+    41.2,
+    28.6,
+    44.2
+  ],
+  "layers": [
+    {
+      "layer": "line",
+      "feature_count": 3163,
+      "file_size_mb": 3.1,
+      "filename": "power_lines_bg.geojson"
+    },
+    {
+      "layer": "minor_line",
+      "feature_count": 5596,
+      "file_size_mb": 4.0,
+      "filename": "power_minor_lines_bg.geojson"
+    },
+    {
+      "layer": "substation",
+      "feature_count": 3631,
+      "file_size_mb": 1.9,
+      "filename": "power_substations_bg.geojson"
+    },
+    {
+      "layer": "plant",
+      "feature_count": 1144,
+      "file_size_mb": 0.7,
+      "filename": "power_plants_bg.geojson"
+    }
+  ],
+  "total_features": 13534,
+  "total_size_mb": 9.7,
+  "source": "OpenStreetMap (Overpass API)",
+  "fetched_at": "2026-07-05T19:50:03Z"
+}

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Fetch power transmission & distribution lines from OpenStreetMap via Overpass API.
+Fetch power infrastructure data from OpenStreetMap via Overpass API.
+
+Supports: power lines, minor lines, cables, substations, plants, generators.
 
 Usage:
     python fetch_overpass.py --country US
-    python fetch_overpass.py --bbox "-125,24,-66,49"  # US bounding box
-    python fetch_overpass.py --country GB --types line,minor_line
-
-Outputs GeoJSON to ../geojson/<country>/
+    python fetch_overpass.py --country GB --layers line,substation,plant
+    python fetch_overpass.py --bbox "-125,24,-66,49" --layers all
 """
 
 import argparse
@@ -16,6 +16,7 @@ import os
 import sys
 import time
 import urllib.request
+import urllib.parse
 import urllib.error
 
 OVERPASS_URLS = [
@@ -24,7 +25,6 @@ OVERPASS_URLS = [
     "https://overpass.openstreetmap.fr/api/interpreter",
 ]
 
-# Country bounding boxes (min_lon, min_lat, max_lon, max_lat)
 COUNTRY_BBOXES = {
     "US": (-125.0, 24.0, -66.0, 49.0),
     "GB": (-8.0, 49.5, 2.0, 61.0),
@@ -53,40 +53,113 @@ COUNTRY_BBOXES = {
     "ID": (95.0, -11.0, 141.0, 6.1),
     "TH": (97.3, 5.6, 105.6, 20.5),
     "VN": (102.1, 8.2, 109.5, 23.4),
+    "PT": (-9.6, 36.9, -6.1, 42.2),
+    "GR": (20.0, 34.8, 27.0, 41.8),
+    "AT": (9.5, 46.4, 17.2, 49.1),
+    "CH": (5.9, 45.8, 10.5, 47.8),
+    "BE": (2.5, 49.5, 6.5, 51.5),
+    "DK": (8.0, 54.5, 13.0, 57.8),
+    "IE": (-10.7, 51.4, -5.3, 55.4),
+    "CZ": (12.1, 48.5, 18.9, 51.1),
+    "HU": (16.0, 45.7, 22.9, 48.6),
+    "RO": (20.3, 43.6, 29.7, 48.3),
+    "BG": (22.3, 41.2, 28.6, 44.2),
+    "HR": (13.4, 42.1, 19.5, 46.6),
+    "RS": (18.8, 42.2, 23.0, 46.2),
+    "UA": (22.1, 44.2, 40.2, 52.4),
+    "NZ": (166.4, -47.3, 178.6, -34.3),
+    "CL": (-75.7, -56.5, -66.3, -17.5),
+    "CO": (-79.0, -4.2, -66.8, 12.6),
+    "PE": (-81.3, -18.3, -68.6, 0.1),
+    "NG": (2.6, 4.2, 14.7, 13.9),
+    "KE": (33.9, -5.0, 41.9, 4.7),
+    "MA": (-13.2, 21.3, -1.0, 35.9),
+    "PH": (117.0, 5.0, 127.0, 19.0),
+    "PK": (60.8, 23.7, 77.8, 37.1),
+    "BD": (88.0, 20.5, 92.7, 26.7),
+    "MY": (99.6, 0.9, 119.3, 7.4),
+    "SG": (103.6, 1.2, 104.0, 1.5),
 }
 
-POWER_TYPES = {
-    "line": "power=line",
-    "minor_line": "power=minor_line",
-    "cable": "power=cable",
+# Layer definitions: (layer_name, tag_key, tag_value, geometry_types)
+# geometry_types: 'way' for lines/areas, 'node' for points, 'both' for all
+LAYERS = {
+    "line": {
+        "query": 'way["power"="line"]',
+        "geom": "way",
+        "filename": "power_lines",
+        "desc": "High-voltage transmission lines",
+    },
+    "minor_line": {
+        "query": 'way["power"="minor_line"]',
+        "geom": "way",
+        "filename": "power_minor_lines",
+        "desc": "Distribution lines",
+    },
+    "cable": {
+        "query": 'way["power"="cable"]',
+        "geom": "way",
+        "filename": "power_cables",
+        "desc": "Underground/submarine cables",
+    },
+    "substation": {
+        "query": '(node["power"="substation"]; way["power"="substation"];)',
+        "geom": "both",
+        "filename": "power_substations",
+        "desc": "Substations (points + polygons)",
+    },
+    "plant": {
+        "query": '(node["power"="plant"]; way["power"="plant"]; relation["power"="plant"];)',
+        "geom": "both",
+        "filename": "power_plants",
+        "desc": "Power plants (points + polygons)",
+    },
+    "generator": {
+        "query": '(node["power"="generator"]; way["power"="generator"];)',
+        "geom": "both",
+        "filename": "power_generators",
+        "desc": "Individual generators (solar, wind, etc.)",
+    },
+    "tower": {
+        "query": 'node["power"="tower"]',
+        "geom": "node",
+        "filename": "power_towers",
+        "desc": "Transmission towers/poles",
+    },
 }
 
 
-def build_query(bbox, power_types):
-    """Build Overpass QL query for power lines in a bounding box."""
+def build_query(bbox, layer_names):
+    """Build Overpass QL query for given layers in a bounding box."""
     min_lon, min_lat, max_lon, max_lat = bbox
     bbox_str = f"{min_lat},{min_lon},{max_lat},{max_lon}"
 
-    queries = []
-    for pt in power_types:
-        tag = POWER_TYPES[pt]
-        key, val = tag.split("=")
-        queries.append(f"""
-    way["{key}"="{val}"]({bbox_str});
-""")
+    query = f"[out:json][timeout:900];\n(\n"
+    for name in layer_names:
+        layer = LAYERS[name]
+        raw = layer["query"]
 
-    query = f"""[out:json][timeout:900];
-"""
-    query += "(\n"
-    for q in queries:
-        query += q
+        # Handle compound queries (parenthesized unions)
+        if raw.startswith("("):
+            # e.g. (node["power"="substation"]; way["power"="substation"];)
+            # Add bbox to each element inside
+            inner = raw.strip()[1:-1].strip()  # remove outer parens
+            for stmt in inner.split(";"):
+                stmt = stmt.strip()
+                if not stmt:
+                    continue
+                # stmt looks like: node["power"="substation"] or way["power"="plant"]
+                query += f"  {stmt}({bbox_str});\n"
+        else:
+            # Simple: way["power"="line"]
+            query += f"  {raw}({bbox_str});\n"
+
     query += ");\nout geom;"
     return query
 
 
 def fetch_overpass(query):
     """Try multiple Overpass endpoints."""
-    import urllib.parse
     data = urllib.parse.urlencode({"data": query}).encode("utf-8")
 
     for url in OVERPASS_URLS:
@@ -117,32 +190,55 @@ def overpass_to_geojson(overpass_data):
     features = []
 
     for el in overpass_data.get("elements", []):
-        if el.get("type") != "way":
-            continue
-
-        geometry_type = el.get("geometry", [])
-        if not geometry_type:
-            continue
-
-        coords = [[node["lon"], node["lat"]] for node in geometry_type]
-
-        if len(coords) < 2:
-            continue
-
         tags = el.get("tags", {})
+        el_type = el.get("type")
+        geometry = None
+
+        # Node → Point
+        if el_type == "node":
+            if "lon" in el and "lat" in el:
+                geometry = {"type": "Point", "coordinates": [el["lon"], el["lat"]]}
+        # Way → LineString or Polygon
+        elif el_type == "way":
+            geom_nodes = el.get("geometry", [])
+            if len(geom_nodes) < 2:
+                continue
+            coords = [[n["lon"], n["lat"]] for n in geom_nodes]
+            # Check if it's a closed way (polygon)
+            if len(coords) >= 4 and coords[0] == coords[-1]:
+                geometry = {"type": "Polygon", "coordinates": [coords]}
+            else:
+                geometry = {"type": "LineString", "coordinates": coords}
+        # Relation → try to get members
+        elif el_type == "relation":
+            members = el.get("members", [])
+            line_coords = []
+            for m in members:
+                if "geometry" in m:
+                    line_coords.extend([[n["lon"], n["lat"]] for n in m["geometry"]])
+            if len(line_coords) >= 2:
+                geometry = {"type": "LineString", "coordinates": line_coords}
+
+        if not geometry:
+            continue
 
         feature = {
             "type": "Feature",
-            "geometry": {"type": "LineString", "coordinates": coords},
+            "geometry": geometry,
             "properties": {
                 "id": el.get("id"),
+                "osm_type": el_type,
                 "power_type": tags.get("power", ""),
                 "voltage": tags.get("voltage", ""),
                 "frequency": tags.get("frequency", ""),
                 "cables": tags.get("cables", ""),
+                "wires": tags.get("wires", ""),
                 "operator": tags.get("operator", ""),
                 "name": tags.get("name", ""),
                 "ref": tags.get("ref", ""),
+                "plant_source": tags.get("plant:source", tags.get("generator:source", "")),
+                "plant_output": tags.get("plant:output:electricity", ""),
+                "substation_type": tags.get("substation", ""),
                 "layer": tags.get("layer", ""),
                 "source": tags.get("source", "OpenStreetMap"),
             },
@@ -152,24 +248,58 @@ def overpass_to_geojson(overpass_data):
     return {"type": "FeatureCollection", "features": features}
 
 
+def fetch_layer(country, bbox, layer_name, output_dir):
+    """Fetch a single layer for a country."""
+    layer = LAYERS[layer_name]
+    print(f"  Fetching {layer_name} ({layer['desc']})...", file=sys.stderr)
+
+    query = build_query(bbox, [layer_name])
+    try:
+        overpass_data = fetch_overpass(query)
+    except RuntimeError as e:
+        print(f"  ✗ {layer_name} failed: {e}", file=sys.stderr)
+        return None
+
+    geojson = overpass_to_geojson(overpass_data)
+    feature_count = len(geojson["features"])
+
+    if feature_count == 0:
+        print(f"  ⚠ {layer_name}: 0 features", file=sys.stderr)
+        return None
+
+    out_file = os.path.join(output_dir, f"{layer['filename']}_{country.lower()}.geojson")
+    with open(out_file, "w") as f:
+        json.dump(geojson, f)
+
+    file_size_mb = os.path.getsize(out_file) / (1024 * 1024)
+    print(f"  ✓ {layer_name}: {feature_count} features, {file_size_mb:.1f} MB", file=sys.stderr)
+
+    return {
+        "layer": layer_name,
+        "feature_count": feature_count,
+        "file_size_mb": round(file_size_mb, 1),
+        "filename": os.path.basename(out_file),
+    }
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Fetch power lines from OSM Overpass API")
+    parser = argparse.ArgumentParser(description="Fetch power infrastructure from OSM")
     parser.add_argument("--country", help="Country code (e.g., US, GB, DE)")
     parser.add_argument("--bbox", help="Bounding box: min_lon,min_lat,max_lon,max_lat")
     parser.add_argument(
-        "--types",
+        "--layers",
         default="line,minor_line",
-        help="Comma-separated power types: line,minor_line,cable",
+        help=f"Comma-separated layers: {','.join(LAYERS.keys())} or 'all'",
     )
-    parser.add_argument("--output-dir", default=None, help="Output directory")
+    parser.add_argument("--output-dir", default=None)
 
     args = parser.parse_args()
 
     if args.country:
         country = args.country.upper()
         if country not in COUNTRY_BBOXES:
-            print(f"Unknown country: {country}", file=sys.stderr)
-            print(f"Available: {', '.join(sorted(COUNTRY_BBOXES.keys()))}", file=sys.stderr)
+            available = ", ".join(sorted(COUNTRY_BBOXES.keys()))
+            print(f"Unknown country: {country}. Available: {available}", file=sys.stderr)
             sys.exit(1)
         bbox = COUNTRY_BBOXES[country]
     elif args.bbox:
@@ -183,35 +313,39 @@ def main():
         print("Must specify --country or --bbox", file=sys.stderr)
         sys.exit(1)
 
-    power_types = [t.strip() for t in args.types.split(",")]
+    if args.layers == "all":
+        layer_names = list(LAYERS.keys())
+    else:
+        layer_names = [l.strip() for l in args.layers.split(",")]
+        for l in layer_names:
+            if l not in LAYERS:
+                print(f"Unknown layer: {l}. Available: {', '.join(LAYERS.keys())}", file=sys.stderr)
+                sys.exit(1)
 
     output_dir = args.output_dir or os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "geojson", country
     )
     os.makedirs(output_dir, exist_ok=True)
 
-    print(f"Fetching power {', '.join(power_types)} for {country}...", file=sys.stderr)
-    query = build_query(bbox, power_types)
-    overpass_data = fetch_overpass(query)
+    print(f"Country: {country}", file=sys.stderr)
+    print(f"Layers: {', '.join(layer_names)}", file=sys.stderr)
+    print(f"BBox: {bbox}", file=sys.stderr)
+    print(file=sys.stderr)
 
-    geojson = overpass_to_geojson(overpass_data)
+    results = []
+    for layer_name in layer_names:
+        result = fetch_layer(country, bbox, layer_name, output_dir)
+        if result:
+            results.append(result)
+        time.sleep(3)  # Be nice to Overpass between layers
 
-    out_file = os.path.join(output_dir, f"power_lines_{country.lower()}.geojson")
-    with open(out_file, "w") as f:
-        json.dump(geojson, f)
-
-    feature_count = len(geojson["features"])
-    file_size_mb = os.path.getsize(out_file) / (1024 * 1024)
-
-    print(f"\n✓ {feature_count} features → {out_file}", file=sys.stderr)
-    print(f"  Size: {file_size_mb:.1f} MB", file=sys.stderr)
-
-    # Also write summary
+    # Write summary
     summary = {
         "country": country,
-        "types": power_types,
-        "feature_count": feature_count,
-        "file_size_mb": round(file_size_mb, 1),
+        "bbox": list(bbox),
+        "layers": results,
+        "total_features": sum(r["feature_count"] for r in results),
+        "total_size_mb": round(sum(r["file_size_mb"] for r in results), 1),
         "source": "OpenStreetMap (Overpass API)",
         "fetched_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
@@ -219,7 +353,9 @@ def main():
     with open(summary_file, "w") as f:
         json.dump(summary, f, indent=2)
 
-    print(f"  Summary → {summary_file}", file=sys.stderr)
+    print(f"\n{'='*50}", file=sys.stderr)
+    print(f"Total: {summary['total_features']} features, {summary['total_size_mb']} MB", file=sys.stderr)
+    print(f"Summary → {summary_file}", file=sys.stderr)
 
 
 if __name__ == "__main__":

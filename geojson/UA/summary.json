@@ -1,0 +1,39 @@
+{
+  "country": "UA",
+  "bbox": [
+    22.1,
+    44.2,
+    40.2,
+    52.4
+  ],
+  "layers": [
+    {
+      "layer": "line",
+      "feature_count": 42107,
+      "file_size_mb": 42.6,
+      "filename": "power_lines_ua.geojson"
+    },
+    {
+      "layer": "minor_line",
+      "feature_count": 37950,
+      "file_size_mb": 27.2,
+      "filename": "power_minor_lines_ua.geojson"
+    },
+    {
+      "layer": "substation",
+      "feature_count": 33007,
+      "file_size_mb": 17.0,
+      "filename": "power_substations_ua.geojson"
+    },
+    {
+      "layer": "plant",
+      "feature_count": 2719,
+      "file_size_mb": 1.8,
+      "filename": "power_plants_ua.geojson"
+    }
+  ],
+  "total_features": 115783,
+  "total_size_mb": 88.6,
+  "source": "OpenStreetMap (Overpass API)",
+  "fetched_at": "2026-07-05T20:07:57Z"
+}

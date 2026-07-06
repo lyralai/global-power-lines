@@ -1,0 +1,39 @@
+{
+  "country": "SG",
+  "bbox": [
+    103.6,
+    1.2,
+    104.0,
+    1.5
+  ],
+  "layers": [
+    {
+      "layer": "line",
+      "feature_count": 32,
+      "file_size_mb": 0.0,
+      "filename": "power_lines_sg.geojson"
+    },
+    {
+      "layer": "minor_line",
+      "feature_count": 2,
+      "file_size_mb": 0.0,
+      "filename": "power_minor_lines_sg.geojson"
+    },
+    {
+      "layer": "substation",
+      "feature_count": 810,
+      "file_size_mb": 0.4,
+      "filename": "power_substations_sg.geojson"
+    },
+    {
+      "layer": "plant",
+      "feature_count": 38,
+      "file_size_mb": 0.0,
+      "filename": "power_plants_sg.geojson"
+    }
+  ],
+  "total_features": 882,
+  "total_size_mb": 0.4,
+  "source": "OpenStreetMap (Overpass API)",
+  "fetched_at": "2026-07-05T22:11:51Z"
+}

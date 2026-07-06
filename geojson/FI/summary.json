@@ -1,0 +1,27 @@
+{
+  "country": "FI",
+  "bbox": [
+    20.6,
+    59.8,
+    31.6,
+    70.1
+  ],
+  "layers": [
+    {
+      "layer": "substation",
+      "feature_count": 11938,
+      "file_size_mb": 5.8,
+      "filename": "power_substations_fi.geojson"
+    },
+    {
+      "layer": "plant",
+      "feature_count": 660,
+      "file_size_mb": 0.5,
+      "filename": "power_plants_fi.geojson"
+    }
+  ],
+  "total_features": 12598,
+  "total_size_mb": 6.3,
+  "source": "OpenStreetMap (Overpass API)",
+  "fetched_at": "2026-07-05T18:55:05Z"
+}

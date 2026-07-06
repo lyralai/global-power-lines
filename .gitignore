@@ -1,1 +1,9 @@
-geojson/GB/power_lines_gb.geojson
+# Redundant — US data is in geojson/US/regions/
+geojson/US/power_lines_us.geojson
+geojson/US/power_minor_lines_us.geojson
+
+# Logs
+batch_run.log
+crawl_output.log
+__pycache__/
+*.pyc

@@ -1,11 +1,27 @@
 {
   "country": "GB",
-  "types": [
-    "line",
-    "minor_line"
+  "bbox": [
+    -8.0,
+    49.5,
+    2.0,
+    61.0
   ],
-  "feature_count": 224149,
-  "file_size_mb": 114.0,
+  "layers": [
+    {
+      "layer": "substation",
+      "feature_count": 63018,
+      "file_size_mb": 29.9,
+      "filename": "power_substations_gb.geojson"
+    },
+    {
+      "layer": "plant",
+      "feature_count": 3451,
+      "file_size_mb": 3.2,
+      "filename": "power_plants_gb.geojson"
+    }
+  ],
+  "total_features": 66469,
+  "total_size_mb": 33.1,
   "source": "OpenStreetMap (Overpass API)",
-  "fetched_at": "2026-07-03T19:28:15Z"
+  "fetched_at": "2026-07-05T18:07:44Z"
 }

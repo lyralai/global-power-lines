@@ -1,0 +1,39 @@
+{
+  "country": "CZ",
+  "bbox": [
+    12.1,
+    48.5,
+    18.9,
+    51.1
+  ],
+  "layers": [
+    {
+      "layer": "line",
+      "feature_count": 12378,
+      "file_size_mb": 8.0,
+      "filename": "power_lines_cz.geojson"
+    },
+    {
+      "layer": "minor_line",
+      "feature_count": 78619,
+      "file_size_mb": 51.3,
+      "filename": "power_minor_lines_cz.geojson"
+    },
+    {
+      "layer": "substation",
+      "feature_count": 24428,
+      "file_size_mb": 12.3,
+      "filename": "power_substations_cz.geojson"
+    },
+    {
+      "layer": "plant",
+      "feature_count": 2048,
+      "file_size_mb": 1.4,
+      "filename": "power_plants_cz.geojson"
+    }
+  ],
+  "total_features": 117473,
+  "total_size_mb": 73.0,
+  "source": "OpenStreetMap (Overpass API)",
+  "fetched_at": "2026-07-05T19:32:54Z"
+}

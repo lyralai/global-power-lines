@@ -1,2 +1,5 @@
-# Git
-*.geojson filter=lfs diff=lfs merge=lfs -text
+# Git LFS — large GeoJSON files only (>100MB)
+geojson/CN/power_lines_cn.geojson filter=lfs diff=lfs merge=lfs -text
+geojson/FR/power_minor_lines_fr.geojson filter=lfs diff=lfs merge=lfs -text
+geojson/FR/power_substations_fr.geojson filter=lfs diff=lfs merge=lfs -text
+geojson/GB/power_lines_gb.geojson filter=lfs diff=lfs merge=lfs -text

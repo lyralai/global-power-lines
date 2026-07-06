@@ -1,0 +1,39 @@
+{
+  "country": "MX",
+  "bbox": [
+    -117.1,
+    14.5,
+    -86.7,
+    32.7
+  ],
+  "layers": [
+    {
+      "layer": "line",
+      "feature_count": 42690,
+      "file_size_mb": 40.2,
+      "filename": "power_lines_mx.geojson"
+    },
+    {
+      "layer": "minor_line",
+      "feature_count": 25822,
+      "file_size_mb": 16.0,
+      "filename": "power_minor_lines_mx.geojson"
+    },
+    {
+      "layer": "substation",
+      "feature_count": 10286,
+      "file_size_mb": 5.5,
+      "filename": "power_substations_mx.geojson"
+    },
+    {
+      "layer": "plant",
+      "feature_count": 1452,
+      "file_size_mb": 1.4,
+      "filename": "power_plants_mx.geojson"
+    }
+  ],
+  "total_features": 80250,
+  "total_size_mb": 63.1,
+  "source": "OpenStreetMap (Overpass API)",
+  "fetched_at": "2026-07-05T20:33:41Z"
+}

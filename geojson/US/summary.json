@@ -1,0 +1,39 @@
+{
+  "country": "US",
+  "regions_fetched": [
+    "pacific_nw",
+    "pacific_s",
+    "mountain_w",
+    "southwest",
+    "plains_n",
+    "plains_s",
+    "texas",
+    "great_lakes",
+    "midwest_s",
+    "northeast",
+    "mid_atlantic",
+    "southeast",
+    "florida",
+    "louisiana_ms",
+    "arkansas",
+    "alaska",
+    "hawaii"
+  ],
+  "layers": {
+    "line": {
+      "feature_count": 326734
+    },
+    "minor_line": {
+      "feature_count": 451236
+    },
+    "substation": {
+      "feature_count": 83757
+    },
+    "plant": {
+      "feature_count": 14143
+    }
+  },
+  "total_features": 875870,
+  "source": "OpenStreetMap (Overpass API)",
+  "fetched_at": "2026-07-03T23:24:38Z"
+}

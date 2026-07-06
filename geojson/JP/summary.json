@@ -1,0 +1,39 @@
+{
+  "country": "JP",
+  "bbox": [
+    129.4,
+    31.0,
+    145.8,
+    45.6
+  ],
+  "layers": [
+    {
+      "layer": "line",
+      "feature_count": 33367,
+      "file_size_mb": 21.5,
+      "filename": "power_lines_jp.geojson"
+    },
+    {
+      "layer": "minor_line",
+      "feature_count": 2625,
+      "file_size_mb": 1.4,
+      "filename": "power_minor_lines_jp.geojson"
+    },
+    {
+      "layer": "substation",
+      "feature_count": 8299,
+      "file_size_mb": 4.8,
+      "filename": "power_substations_jp.geojson"
+    },
+    {
+      "layer": "plant",
+      "feature_count": 19174,
+      "file_size_mb": 12.3,
+      "filename": "power_plants_jp.geojson"
+    }
+  ],
+  "total_features": 63465,
+  "total_size_mb": 40.0,
+  "source": "OpenStreetMap (Overpass API)",
+  "fetched_at": "2026-07-05T21:12:04Z"
+}

@@ -1,0 +1,39 @@
+{
+  "country": "RS",
+  "bbox": [
+    18.8,
+    42.2,
+    23.0,
+    46.2
+  ],
+  "layers": [
+    {
+      "layer": "line",
+      "feature_count": 2632,
+      "file_size_mb": 2.8,
+      "filename": "power_lines_rs.geojson"
+    },
+    {
+      "layer": "minor_line",
+      "feature_count": 1594,
+      "file_size_mb": 1.3,
+      "filename": "power_minor_lines_rs.geojson"
+    },
+    {
+      "layer": "substation",
+      "feature_count": 1554,
+      "file_size_mb": 0.8,
+      "filename": "power_substations_rs.geojson"
+    },
+    {
+      "layer": "plant",
+      "feature_count": 330,
+      "file_size_mb": 0.3,
+      "filename": "power_plants_rs.geojson"
+    }
+  ],
+  "total_features": 6110,
+  "total_size_mb": 5.2,
+  "source": "OpenStreetMap (Overpass API)",
+  "fetched_at": "2026-07-05T19:55:35Z"
+}

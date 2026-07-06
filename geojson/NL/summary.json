@@ -1,11 +1,27 @@
 {
   "country": "NL",
-  "types": [
-    "line",
-    "minor_line"
+  "bbox": [
+    3.3,
+    50.7,
+    7.2,
+    53.6
   ],
-  "feature_count": 16195,
-  "file_size_mb": 6.7,
+  "layers": [
+    {
+      "layer": "substation",
+      "feature_count": 21032,
+      "file_size_mb": 9.8,
+      "filename": "power_substations_nl.geojson"
+    },
+    {
+      "layer": "plant",
+      "feature_count": 1444,
+      "file_size_mb": 1.4,
+      "filename": "power_plants_nl.geojson"
+    }
+  ],
+  "total_features": 22476,
+  "total_size_mb": 11.2,
   "source": "OpenStreetMap (Overpass API)",
-  "fetched_at": "2026-07-03T19:29:15Z"
+  "fetched_at": "2026-07-05T18:50:26Z"
 }

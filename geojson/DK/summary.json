@@ -1,0 +1,39 @@
+{
+  "country": "DK",
+  "bbox": [
+    8.0,
+    54.5,
+    13.0,
+    57.8
+  ],
+  "layers": [
+    {
+      "layer": "line",
+      "feature_count": 6092,
+      "file_size_mb": 3.7,
+      "filename": "power_lines_dk.geojson"
+    },
+    {
+      "layer": "minor_line",
+      "feature_count": 398,
+      "file_size_mb": 0.3,
+      "filename": "power_minor_lines_dk.geojson"
+    },
+    {
+      "layer": "substation",
+      "feature_count": 8797,
+      "file_size_mb": 4.0,
+      "filename": "power_substations_dk.geojson"
+    },
+    {
+      "layer": "plant",
+      "feature_count": 548,
+      "file_size_mb": 0.5,
+      "filename": "power_plants_dk.geojson"
+    }
+  ],
+  "total_features": 15835,
+  "total_size_mb": 8.5,
+  "source": "OpenStreetMap (Overpass API)",
+  "fetched_at": "2026-07-05T19:24:53Z"
+}

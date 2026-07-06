@@ -1,0 +1,39 @@
+{
+  "country": "AR",
+  "bbox": [
+    -73.5,
+    -55.1,
+    -53.6,
+    -21.8
+  ],
+  "layers": [
+    {
+      "layer": "line",
+      "feature_count": 7272,
+      "file_size_mb": 13.3,
+      "filename": "power_lines_ar.geojson"
+    },
+    {
+      "layer": "minor_line",
+      "feature_count": 4855,
+      "file_size_mb": 3.9,
+      "filename": "power_minor_lines_ar.geojson"
+    },
+    {
+      "layer": "substation",
+      "feature_count": 3206,
+      "file_size_mb": 1.7,
+      "filename": "power_substations_ar.geojson"
+    },
+    {
+      "layer": "plant",
+      "feature_count": 1503,
+      "file_size_mb": 1.0,
+      "filename": "power_plants_ar.geojson"
+    }
+  ],
+  "total_features": 16836,
+  "total_size_mb": 19.9,
+  "source": "OpenStreetMap (Overpass API)",
+  "fetched_at": "2026-07-05T20:52:13Z"
+}

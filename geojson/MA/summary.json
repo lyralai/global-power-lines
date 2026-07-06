@@ -1,0 +1,39 @@
+{
+  "country": "MA",
+  "bbox": [
+    -13.2,
+    21.3,
+    -1.0,
+    35.9
+  ],
+  "layers": [
+    {
+      "layer": "line",
+      "feature_count": 2032,
+      "file_size_mb": 3.3,
+      "filename": "power_lines_ma.geojson"
+    },
+    {
+      "layer": "minor_line",
+      "feature_count": 5627,
+      "file_size_mb": 5.3,
+      "filename": "power_minor_lines_ma.geojson"
+    },
+    {
+      "layer": "substation",
+      "feature_count": 547,
+      "file_size_mb": 0.3,
+      "filename": "power_substations_ma.geojson"
+    },
+    {
+      "layer": "plant",
+      "feature_count": 133,
+      "file_size_mb": 0.1,
+      "filename": "power_plants_ma.geojson"
+    }
+  ],
+  "total_features": 8339,
+  "total_size_mb": 9.0,
+  "source": "OpenStreetMap (Overpass API)",
+  "fetched_at": "2026-07-05T22:28:07Z"
+}

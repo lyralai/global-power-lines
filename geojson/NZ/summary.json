@@ -1,0 +1,39 @@
+{
+  "country": "NZ",
+  "bbox": [
+    166.4,
+    -47.3,
+    178.6,
+    -34.3
+  ],
+  "layers": [
+    {
+      "layer": "line",
+      "feature_count": 2536,
+      "file_size_mb": 2.3,
+      "filename": "power_lines_nz.geojson"
+    },
+    {
+      "layer": "minor_line",
+      "feature_count": 77116,
+      "file_size_mb": 54.9,
+      "filename": "power_minor_lines_nz.geojson"
+    },
+    {
+      "layer": "substation",
+      "feature_count": 1614,
+      "file_size_mb": 0.9,
+      "filename": "power_substations_nz.geojson"
+    },
+    {
+      "layer": "plant",
+      "feature_count": 139,
+      "file_size_mb": 0.1,
+      "filename": "power_plants_nz.geojson"
+    }
+  ],
+  "total_features": 81405,
+  "total_size_mb": 58.2,
+  "source": "OpenStreetMap (Overpass API)",
+  "fetched_at": "2026-07-05T21:26:06Z"
+}

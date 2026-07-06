@@ -1,0 +1,27 @@
+{
+  "country": "DE",
+  "bbox": [
+    5.8,
+    47.2,
+    15.0,
+    55.1
+  ],
+  "layers": [
+    {
+      "layer": "substation",
+      "feature_count": 134397,
+      "file_size_mb": 63.3,
+      "filename": "power_substations_de.geojson"
+    },
+    {
+      "layer": "plant",
+      "feature_count": 12282,
+      "file_size_mb": 9.4,
+      "filename": "power_plants_de.geojson"
+    }
+  ],
+  "total_features": 146679,
+  "total_size_mb": 72.7,
+  "source": "OpenStreetMap (Overpass API)",
+  "fetched_at": "2026-07-05T18:12:46Z"
+}

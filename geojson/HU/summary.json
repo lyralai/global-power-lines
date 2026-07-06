@@ -1,0 +1,39 @@
+{
+  "country": "HU",
+  "bbox": [
+    16.0,
+    45.7,
+    22.9,
+    48.6
+  ],
+  "layers": [
+    {
+      "layer": "line",
+      "feature_count": 7661,
+      "file_size_mb": 5.3,
+      "filename": "power_lines_hu.geojson"
+    },
+    {
+      "layer": "minor_line",
+      "feature_count": 41485,
+      "file_size_mb": 28.8,
+      "filename": "power_minor_lines_hu.geojson"
+    },
+    {
+      "layer": "substation",
+      "feature_count": 8642,
+      "file_size_mb": 4.1,
+      "filename": "power_substations_hu.geojson"
+    },
+    {
+      "layer": "plant",
+      "feature_count": 1517,
+      "file_size_mb": 1.0,
+      "filename": "power_plants_hu.geojson"
+    }
+  ],
+  "total_features": 59305,
+  "total_size_mb": 39.2,
+  "source": "OpenStreetMap (Overpass API)",
+  "fetched_at": "2026-07-05T19:34:56Z"
+}

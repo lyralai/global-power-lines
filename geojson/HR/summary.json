@@ -1,0 +1,39 @@
+{
+  "country": "HR",
+  "bbox": [
+    13.4,
+    42.1,
+    19.5,
+    46.6
+  ],
+  "layers": [
+    {
+      "layer": "line",
+      "feature_count": 4833,
+      "file_size_mb": 4.2,
+      "filename": "power_lines_hr.geojson"
+    },
+    {
+      "layer": "minor_line",
+      "feature_count": 16515,
+      "file_size_mb": 10.5,
+      "filename": "power_minor_lines_hr.geojson"
+    },
+    {
+      "layer": "substation",
+      "feature_count": 6823,
+      "file_size_mb": 3.3,
+      "filename": "power_substations_hr.geojson"
+    },
+    {
+      "layer": "plant",
+      "feature_count": 1327,
+      "file_size_mb": 1.0,
+      "filename": "power_plants_hr.geojson"
+    }
+  ],
+  "total_features": 29498,
+  "total_size_mb": 19.0,
+  "source": "OpenStreetMap (Overpass API)",
+  "fetched_at": "2026-07-05T19:52:08Z"
+}
