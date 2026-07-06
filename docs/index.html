@@ -49,21 +49,59 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* === Expandable Tree Legend === */
     #legend {
       position: absolute; bottom: 20px; left: 20px; z-index: 1000;
-      background: rgba(0,0,0,0.9); border: 1px solid #333;
-      padding: 14px 16px; border-radius: 10px;
-      font-size: 12px; color: #ccc; line-height: 1.6; max-width: 320px;
+      background: rgba(0,0,0,0.92); border: 1px solid #333;
+      padding: 0; border-radius: 10px;
+      font-size: 12px; color: #ccc; line-height: 1.6;
+      max-width: 300px; max-height: 70vh; overflow: hidden;
+      display: flex; flex-direction: column;
     }
-    #legend h4 { margin: 0 0 8px; font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
-    .country-pill {
-      display: inline-block; background: #222; color: #ddd; padding: 2px 7px; border-radius: 4px;
-      margin: 1px 3px 1px 0; cursor: pointer; font-size: 11px; transition: all 0.1s;
+    #legendHeader {
+      padding: 12px 16px 8px; cursor: default;
+      border-bottom: 1px solid #222;
     }
-    .country-pill:hover { background: #ff6b35; color: #000; }
-    .legend-row { display: flex; align-items: center; gap: 8px; margin: 2px 0; }
-    .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
-    .legend-line { width: 24px; height: 2px; border-radius: 1px; }
+    #legendBody {
+      overflow-y: auto; padding: 8px 0; flex: 1;
+    }
+    .layer-toggle {
+      display: flex; align-items: center; gap: 8px;
+      padding: 4px 16px; cursor: pointer;
+      transition: background 0.1s;
+    }
+    .layer-toggle:hover { background: rgba(255,107,53,0.08); }
+    .layer-toggle input[type="checkbox"] {
+      accent-color: #ff6b35; width: 14px; height: 14px; cursor: pointer;
+    }
+    .layer-line {
+      width: 20px; height: 0; border-top: 2px solid; display: inline-block;
+    }
+    .layer-dot {
+      width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+    }
+
+    .tree-node { user-select: none; }
+    .tree-label {
+      display: flex; align-items: center; gap: 4px;
+      padding: 3px 16px; cursor: pointer;
+      font-size: 11px; color: #999;
+    }
+    .tree-label:hover { color: #ff6b35; }
+    .tree-arrow {
+      display: inline-block; width: 12px; text-align: center;
+      transition: transform 0.15s; font-size: 9px;
+    }
+    .tree-node.collapsed > .tree-children { display: none; }
+    .tree-node.collapsed > .tree-label .tree-arrow { transform: rotate(-90deg); }
+    .tree-children { padding-left: 12px; }
+    .country-row {
+      display: flex; align-items: center; gap: 6px;
+      padding: 2px 16px 2px 28px; cursor: pointer;
+      font-size: 11px; color: #aaa;
+    }
+    .country-row:hover { color: #ff6b35; background: rgba(255,107,53,0.05); }
+    .country-row.active { color: #ff6b35; }
 
     #stats {
       position: absolute; bottom: 20px; right: 20px; z-index: 1000;
@@ -77,6 +115,11 @@
       font-size: 12px; line-height: 1.5;
     }
     .leaflet-popup-content b { color: #ff6b35; }
+
+    /* Scrollbar styling */
+    #legendBody::-webkit-scrollbar { width: 4px; }
+    #legendBody::-webkit-scrollbar-track { background: transparent; }
+    #legendBody::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
   </style>
 </head>
 <body>
@@ -100,14 +143,33 @@
 <div id="map"></div>
 
 <div id="legend">
-  <h4>Layers</h4>
-  <div class="legend-row"><div class="legend-line" style="background:#ff6b35;"></div> Transmission lines</div>
-  <div class="legend-row"><div class="legend-line" style="background:#ffd23f;opacity:0.5;"></div> Distribution (minor)</div>
-  <div class="legend-row"><div class="legend-dot" style="background:#00d4ff;"></div> Substations</div>
-  <div class="legend-row"><div class="legend-dot" style="background:#00ff88;"></div> Power plants</div>
+  <div id="legendHeader">
+    <h4 style="margin:0; font-size:11px; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Layers</h4>
+  </div>
+  <div id="legendBody">
+    <!-- Global layers -->
+    <div class="layer-toggle" id="toggleBackbone">
+      <input type="checkbox" checked />
+      <span class="layer-line" style="border-color:#ff4500; border-width:2.5px;"></span>
+      <span>Backbone (≥380 kV)</span>
+      <span style="color:#555; font-size:10px; margin-left:auto;">121k lines</span>
+    </div>
+    <div class="layer-toggle" id="toggleTransmission">
+      <input type="checkbox" />
+      <span class="layer-line" style="border-color:#ff8c00; border-width:1.5px;"></span>
+      <span>Transmission (≥220 kV)</span>
+      <span style="color:#555; font-size:10px; margin-left:auto;">363k lines</span>
+    </div>
 
-  <h4 style="margin-top:10px">Countries (click to load)</h4>
-  <div id="countryList" style="font-size:11px; max-height:120px; overflow-y:auto; line-height:1.8;"></div>
+    <!-- Country tree -->
+    <div class="tree-node collapsed" id="countryTree">
+      <div class="tree-label" onclick="toggleTreeNode('countryTree')">
+        <span class="tree-arrow">▼</span>
+        <span>Countries (click to load detail)</span>
+      </div>
+      <div class="tree-children" id="countryTreeChildren"></div>
+    </div>
+  </div>
 </div>
 
 <div id="stats" style="display:none;">
@@ -146,6 +208,8 @@ const COLORS = {
   minor_line: '#ffd23f',
   substation: '#00d4ff',
   plant: '#00ff88',
+  backbone: '#ff4500',
+  transmission: '#ff8c00',
 };
 
 const CC_TO_NAME = {};
@@ -182,34 +246,57 @@ Object.entries(COUNTRIES).forEach(([region, countries]) => {
   select.appendChild(optgroup);
 });
 
-// Populate visible country list in legend
-const countryListEl = document.getElementById('countryList');
+// Build country tree in legend
+const countryTreeChildren = document.getElementById('countryTreeChildren');
 Object.entries(COUNTRIES).forEach(([region, countries]) => {
-  const regionLabel = document.createElement('div');
-  regionLabel.style.cssText = 'color:#666; font-size:10px; margin-top:4px;';
-  regionLabel.textContent = region;
-  countryListEl.appendChild(regionLabel);
+  const regionNode = document.createElement('div');
+  regionNode.className = 'tree-node collapsed';
+  regionNode.id = `region-${region.replace(/\s+/g,'')}`;
 
+  const regionLabel = document.createElement('div');
+  regionLabel.className = 'tree-label';
+  regionLabel.onclick = () => toggleTreeNode(regionNode.id);
+  regionLabel.innerHTML = `<span class="tree-arrow">▼</span><span>${region}</span>`;
+  regionNode.appendChild(regionLabel);
+
+  const regionChildren = document.createElement('div');
+  regionChildren.className = 'tree-children';
   countries.forEach(([cc, name]) => {
-    const pill = document.createElement('span');
-    pill.className = 'country-pill';
-    pill.textContent = cc;
-    pill.title = name;
-    pill.onclick = () => {
+    const row = document.createElement('div');
+    row.className = 'country-row';
+    row.dataset.cc = cc;
+    row.textContent = `${name}`;
+    row.onclick = () => {
       select.value = cc;
       loadCountry(cc);
     };
-    countryListEl.appendChild(pill);
+    regionChildren.appendChild(row);
   });
+  regionNode.appendChild(regionChildren);
+  countryTreeChildren.appendChild(regionNode);
 });
+
+function toggleTreeNode(id) {
+  const node = document.getElementById(id);
+  node.classList.toggle('collapsed');
+}
+
+// === Global Layers ===
+let backboneLayer = null;
+let transmissionLayer = null;
+let backboneData = null;
+let transmissionData = null;
+let backboneVisible = true;
+let transmissionVisible = false;
 
 let currentLayers = [];
 
-function clearMap() {
+function clearCountryLayers() {
   currentLayers.forEach(l => map.removeLayer(l));
   currentLayers = [];
-  document.getElementById('legend').style.display = 'none';
   document.getElementById('stats').style.display = 'none';
+  // Remove active highlight
+  document.querySelectorAll('.country-row.active').forEach(el => el.classList.remove('active'));
 }
 
 function showLoading(text) {
@@ -220,7 +307,105 @@ function hideLoading() {
   document.getElementById('loading').style.display = 'none';
 }
 
-// Files tracked with Git LFS — need media.githubusercontent.com instead of raw
+// Style by voltage
+function styleLine(v_max) {
+  if (v_max >= 380000) return { color: COLORS.backbone, weight: 2.5, opacity: 0.85 };
+  if (v_max >= 220000) return { color: COLORS.transmission, weight: 1.5, opacity: 0.7 };
+  if (v_max >= 110000) return { color: COLORS.line, weight: 1.2, opacity: 0.6 };
+  return { color: COLORS.minor_line, weight: 0.7, opacity: 0.35 };
+}
+
+async function loadBackbone() {
+  if (backboneData) return backboneData;
+  showLoading('Loading global backbone (≥380 kV)...');
+  try {
+    const resp = await fetch('data/global_backbone_simple.geojson');
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    backboneData = await resp.json();
+    hideLoading();
+    return backboneData;
+  } catch(e) {
+    console.warn('Backbone load failed:', e.message);
+    hideLoading();
+    return null;
+  }
+}
+
+async function loadTransmission() {
+  if (transmissionData) return transmissionData;
+  showLoading('Loading global transmission (≥220 kV)...');
+  try {
+    const resp = await fetch('data/global_transmission_simple.geojson');
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    transmissionData = await resp.json();
+    hideLoading();
+    return transmissionData;
+  } catch(e) {
+    console.warn('Transmission load failed:', e.message);
+    hideLoading();
+    return null;
+  }
+}
+
+function renderBackbone() {
+  if (!backboneData) return;
+  if (backboneLayer) map.removeLayer(backboneLayer);
+  backboneLayer = L.geoJSON(backboneData, {
+    style: feat => styleLine(feat.properties.v_max || 0),
+    onEachFeature: (feat, lyr) => {
+      const p = feat.properties || {};
+      lyr.bindPopup(
+        `<b>Transmission Line</b><br>` +
+        `Voltage: ${p.voltage || '?'} V<br>` +
+        `Country: ${p.country || '?'}`
+      );
+    },
+    // Performance: only render at appropriate zoom
+    renderer: L.canvas({ padding: 0.5 }),
+  });
+  if (backboneVisible) backboneLayer.addTo(map);
+}
+
+function renderTransmission() {
+  if (!transmissionData) return;
+  if (transmissionLayer) map.removeLayer(transmissionLayer);
+  transmissionLayer = L.geoJSON(transmissionData, {
+    style: feat => styleLine(feat.properties.v_max || 0),
+    onEachFeature: (feat, lyr) => {
+      const p = feat.properties || {};
+      lyr.bindPopup(
+        `<b>Transmission Line</b><br>` +
+        `Voltage: ${p.voltage || '?'} V<br>` +
+        `Country: ${p.country || '?'}`
+      );
+    },
+    renderer: L.canvas({ padding: 0.5 }),
+  });
+  if (transmissionVisible) transmissionLayer.addTo(map);
+}
+
+// Toggle handlers
+document.querySelector('#toggleBackbone input').addEventListener('change', async (e) => {
+  backboneVisible = e.target.checked;
+  if (backboneVisible) {
+    if (!backboneData) await loadBackbone();
+    if (backboneData) renderBackbone();
+  } else {
+    if (backboneLayer) map.removeLayer(backboneLayer);
+  }
+});
+
+document.querySelector('#toggleTransmission input').addEventListener('change', async (e) => {
+  transmissionVisible = e.target.checked;
+  if (transmissionVisible) {
+    if (!transmissionData) await loadTransmission();
+    if (transmissionData) renderTransmission();
+  } else {
+    if (transmissionLayer) map.removeLayer(transmissionLayer);
+  }
+});
+
+// LFS files need media.githubusercontent.com
 const LFS_FILES = new Set([
   'geojson/CN/power_lines_cn.geojson',
   'geojson/FR/power_minor_lines_fr.geojson',
@@ -228,19 +413,18 @@ const LFS_FILES = new Set([
   'geojson/GB/power_lines_gb.geojson',
 ]);
 
-// Large files that could crash the browser — warn before loading
 const LARGE_FILES = new Set([
-  'geojson/CN/power_lines_cn.geojson',   // 232 MB
-  'geojson/FR/power_minor_lines_fr.geojson', // 138 MB
-  'geojson/FR/power_substations_fr.geojson', // 121 MB
-  'geojson/GB/power_lines_gb.geojson',       // 114 MB
-  'geojson/DE/power_lines_de.geojson',       // 94 MB
-  'geojson/CA/power_lines_ca.geojson',       // 96 MB
-  'geojson/CA/power_minor_lines_ca.geojson', // 97 MB
-  'geojson/PL/power_lines_pl.geojson',       // 83 MB
-  'geojson/DE/power_substations_de.geojson', // 63 MB
-  'geojson/ES/power_lines_es.geojson',       // 67 MB
-  'geojson/IN/power_lines_in.geojson',       // 67 MB
+  'geojson/CN/power_lines_cn.geojson',
+  'geojson/FR/power_minor_lines_fr.geojson',
+  'geojson/FR/power_substations_fr.geojson',
+  'geojson/GB/power_lines_gb.geojson',
+  'geojson/DE/power_lines_de.geojson',
+  'geojson/CA/power_lines_ca.geojson',
+  'geojson/CA/power_minor_lines_ca.geojson',
+  'geojson/PL/power_lines_pl.geojson',
+  'geojson/DE/power_substations_de.geojson',
+  'geojson/ES/power_lines_es.geojson',
+  'geojson/IN/power_lines_in.geojson',
 ]);
 
 function layerFilename(country, layer) {
@@ -271,10 +455,7 @@ function geojsonUrl(country, layer) {
     substation: `power_substations_${country.toLowerCase()}.geojson`,
     plant: `power_plants_${country.toLowerCase()}.geojson`,
   };
-  const path = country === 'US'
-    ? `geojson/US/${fileMap[layer]}`
-    : `geojson/${country}/${fileMap[layer]}`;
-  // LFS files need media.githubusercontent.com — raw returns pointer text
+  const path = `geojson/${country}/${fileMap[layer]}`;
   if (LFS_FILES.has(path)) {
     return `https://media.githubusercontent.com/media/${repo}/${branch}/${path}`;
   }
@@ -282,22 +463,29 @@ function geojsonUrl(country, layer) {
 }
 
 async function loadCountry(country) {
-  clearMap();
+  // Auto-hide global layers when loading a country
+  if (backboneLayer && map.hasLayer(backboneLayer)) map.removeLayer(backboneLayer);
+  if (transmissionLayer && map.hasLayer(transmissionLayer)) map.removeLayer(transmissionLayer);
+
+  clearCountryLayers();
 
   const cc = country;
   const name = CC_TO_NAME[cc] || cc;
+
+  // Highlight active country in legend
+  document.querySelectorAll('.country-row').forEach(el => {
+    el.classList.toggle('active', el.dataset.cc === cc);
+  });
 
   // Determine which layers to load
   let layers = cc === 'US'
     ? ['line', 'substation', 'plant']
     : ['line', 'minor_line', 'substation', 'plant'];
 
-  // Warn about large files and let user decide which layers to skip
+  // Warn about large files
   const largeLayers = [];
   for (const layer of layers) {
-    const path = cc === 'US'
-      ? `geojson/US/${layerFilename(cc, layer)}`
-      : `geojson/${cc}/${layerFilename(cc, layer)}`;
+    const path = `geojson/${cc}/${layerFilename(cc, layer)}`;
     if (LARGE_FILES.has(path)) {
       largeLayers.push({ layer, path, sizeMB: largeFileSize(layer, cc) });
     }
@@ -305,8 +493,7 @@ async function loadCountry(country) {
 
   if (largeLayers.length > 0) {
     const sizeStr = largeLayers.map(l => `${l.layer} (~${l.sizeMB} MB)`).join(', ');
-    if (!confirm(`${name} has large data layers (${sizeStr}).\n\nLoading these may be slow. Click OK to load everything, or Cancel to load only lighter layers (transmission lines + points).`)) {
-      // Remove the heavy layers
+    if (!confirm(`${name} has large data layers (${sizeStr}).\n\nLoading these may be slow. Click OK to load everything, or Cancel to load only lighter layers.`)) {
       layers = layers.filter(l => !largeLayers.some(ll => ll.layer === l));
     }
   }
@@ -326,7 +513,6 @@ async function loadCountry(country) {
         continue;
       }
       const text = await resp.text();
-      // Check for LFS pointer
       if (text.startsWith('version https://git-lfs')) {
         console.warn(`${layer}: got LFS pointer, skipping`);
         continue;
@@ -341,7 +527,6 @@ async function loadCountry(country) {
       let geoLayer;
 
       if (layer === 'substation' || layer === 'plant') {
-        // Points
         geoLayer = L.geoJSON(data, {
           pointToLayer: (feat, latlng) => {
             const marker = L.circleMarker(latlng, {
@@ -369,11 +554,22 @@ async function loadCountry(country) {
                 `Voltage: ${p.voltage || 'unknown'}`
               );
             }
-          }
+          },
+          renderer: L.canvas({ padding: 0.5 }),
         });
       } else if (layer === 'line') {
+        // Style by voltage
         geoLayer = L.geoJSON(data, {
-          style: { color, weight: 2, opacity: 0.85 },
+          style: feat => {
+            const v = feat.properties?.voltage || '';
+            let vMax = 0;
+            const parts = String(v).split(';');
+            for (const p of parts) {
+              const n = parseInt(p.trim());
+              if (n > vMax) vMax = n;
+            }
+            return styleLine(vMax);
+          },
           onEachFeature: (feat, lyr) => {
             const p = feat.properties || {};
             lyr.bindPopup(
@@ -381,16 +577,14 @@ async function loadCountry(country) {
               `Voltage: ${p.voltage || 'unknown'} kV<br>` +
               `Operator: ${p.operator || 'unknown'}`
             );
-          }
+          },
+          renderer: L.canvas({ padding: 0.5 }),
         });
       } else {
-        // Minor lines — dimmer, only show when zoomed in
         geoLayer = L.geoJSON(data, {
-          style: { color, weight: 0.8, opacity: 0.3 },
+          style: { color, weight: 0.7, opacity: 0.3 },
+          renderer: L.canvas({ padding: 0.5 }),
         });
-        if (map.getZoom() < 9) {
-          // Don't add yet, store for zoom toggle
-        }
       }
 
       geoLayer.addTo(map);
@@ -405,6 +599,9 @@ async function loadCountry(country) {
 
   if (totalFeatures === 0) {
     alert(`No data found for ${name}. Files may still be uploading.`);
+    // Re-show global layers
+    if (backboneVisible && backboneLayer) backboneLayer.addTo(map);
+    if (transmissionVisible && transmissionLayer) transmissionLayer.addTo(map);
     return;
   }
 
@@ -419,8 +616,7 @@ async function loadCountry(country) {
     }
   }
 
-  // Update UI
-  document.getElementById('legend').style.display = 'block';
+  // Update stats
   const stats = document.getElementById('stats');
   stats.style.display = 'block';
   document.getElementById('countryName').textContent = name;
@@ -433,21 +629,26 @@ select.addEventListener('change', (e) => {
   if (e.target.value) {
     loadCountry(e.target.value);
   } else {
-    clearMap();
+    clearCountryLayers();
+    // Re-show global layers
+    if (backboneVisible && backboneLayer) backboneLayer.addTo(map);
+    if (transmissionVisible && transmissionLayer) transmissionLayer.addTo(map);
   }
 });
 
 document.getElementById('clearBtn').addEventListener('click', () => {
   select.value = '';
-  clearMap();
+  clearCountryLayers();
+  // Re-show global layers
+  if (backboneVisible && backboneLayer) backboneLayer.addTo(map);
+  if (transmissionVisible && transmissionLayer) transmissionLayer.addTo(map);
 });
 
-// Zoom toggle for minor lines
-map.on('zoomend', () => {
-  // Could add logic to show/hide minor lines based on zoom
-});
-
-hideLoading();
+// Load backbone on startup
+(async () => {
+  backboneData = await loadBackbone();
+  if (backboneData) renderBackbone();
+})();
 </script>
 </body>
 </html>
