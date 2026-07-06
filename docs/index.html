@@ -1,115 +1,349 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Global Power Lines — Netherlands</title>
+  <title>Global Power Lines — Worldwide Power Infrastructure Map</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    body { margin: 0; padding: 0; background: #0a0a0a; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; background: #0a0a0a; font-family: -apple-system, system-ui, sans-serif; }
     #map { position: absolute; top: 0; bottom: 0; width: 100%; background: #0a0a0a; }
+
     #header {
       position: absolute; top: 0; left: 0; right: 0; z-index: 1000;
-      background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
-      padding: 16px 20px 32px; pointer-events: none;
+      background: linear-gradient(180deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0) 100%);
+      padding: 14px 20px 40px; pointer-events: none;
     }
     #header h1 {
-      margin: 0; font: 700 18px -apple-system, system-ui, sans-serif;
+      margin: 0; font-size: 18px; font-weight: 700;
       color: #ff6b35; letter-spacing: -0.3px;
     }
     #header p {
-      margin: 2px 0 0; font: 400 12px -apple-system, system-ui, sans-serif;
-      color: #888;
+      margin: 2px 0 0; font-size: 12px; color: #888;
     }
+
+    #controls {
+      position: absolute; top: 14px; right: 14px; z-index: 1000;
+      display: flex; gap: 8px; align-items: center;
+    }
+    select, button {
+      background: rgba(0,0,0,0.85); border: 1px solid #333; color: #ddd;
+      padding: 8px 12px; border-radius: 8px; font-size: 13px;
+      cursor: pointer; outline: none; backdrop-filter: blur(8px);
+    }
+    select:hover, button:hover { border-color: #ff6b35; color: #ff6b35; }
+    select { max-width: 200px; }
+
+    #loading {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      z-index: 999; background: rgba(0,0,0,0.9); border: 1px solid #ff6b35;
+      padding: 20px 32px; border-radius: 12px; color: #ff6b35;
+      font-size: 15px; font-weight: 600; display: none;
+      text-align: center; min-width: 200px;
+    }
+    #loading .spinner {
+      width: 28px; height: 28px; border: 3px solid #333; border-top-color: #ff6b35;
+      border-radius: 50%; margin: 0 auto 10px; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     #legend {
       position: absolute; bottom: 20px; left: 20px; z-index: 1000;
       background: rgba(0,0,0,0.85); border: 1px solid #333;
       padding: 12px 16px; border-radius: 8px;
-      font: 12px/1.6 -apple-system, system-ui, sans-serif; color: #ccc;
+      font-size: 12px; color: #ccc; line-height: 1.6;
     }
     .legend-row { display: flex; align-items: center; gap: 8px; margin: 2px 0; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
     .legend-line { width: 24px; height: 2px; border-radius: 1px; }
+
     #stats {
-      position: absolute; top: 20px; right: 20px; z-index: 1000;
+      position: absolute; bottom: 20px; right: 20px; z-index: 1000;
       background: rgba(0,0,0,0.85); border: 1px solid #333;
       padding: 10px 14px; border-radius: 8px;
-      font: 12px/1.5 -apple-system, system-ui, sans-serif; color: #aaa;
+      font-size: 12px; color: #aaa; line-height: 1.6;
     }
     #stats b { color: #ff6b35; }
+
+    .leaflet-popup-content {
+      font-size: 12px; line-height: 1.5;
+    }
+    .leaflet-popup-content b { color: #ff6b35; }
   </style>
 </head>
 <body>
 <div id="header">
-  <h1>Global Power Lines — Netherlands</h1>
-  <p>16,195 features from OpenStreetMap · Transmission & Distribution</p>
+  <h1>⚡ Global Power Lines</h1>
+  <p>Power infrastructure from OpenStreetMap — 52 countries, 2M+ features</p>
 </div>
+
+<div id="controls">
+  <select id="countrySelect" title="Select country">
+    <option value="">— Select Country —</option>
+  </select>
+  <button id="clearBtn" title="Clear map">Clear</button>
+</div>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <div id="loadingText">Loading data...</div>
+</div>
+
 <div id="map"></div>
-<div id="legend">
-  <div class="legend-row"><div class="legend-line" style="background:#ff6b35;"></div> Transmission (high voltage)</div>
+
+<div id="legend" style="display:none;">
+  <div class="legend-row"><div class="legend-line" style="background:#ff6b35;"></div> Transmission lines</div>
   <div class="legend-row"><div class="legend-line" style="background:#ffd23f;opacity:0.5;"></div> Distribution (minor)</div>
+  <div class="legend-row"><div class="legend-dot" style="background:#00d4ff;"></div> Substations</div>
+  <div class="legend-row"><div class="legend-dot" style="background:#00ff88;"></div> Power plants</div>
 </div>
-<div id="stats"><b id="count">0</b> lines loaded</div>
+
+<div id="stats" style="display:none;">
+  <b id="countryName">—</b><br>
+  <span id="featureCount">0</span> features · <span id="dataSize">—</span>
+</div>
+
 <script>
-  const MAPBOX_TOKEN = localStorage.getItem('mapbox_token') || '';
+const COUNTRIES = {
+  "Europe": [
+    ["AT","Austria"],["BE","Belgium"],["BG","Bulgaria"],["CH","Switzerland"],
+    ["CZ","Czechia"],["DE","Germany"],["DK","Denmark"],["ES","Spain"],
+    ["FI","Finland"],["FR","France"],["GB","United Kingdom"],["GR","Greece"],
+    ["HR","Croatia"],["HU","Hungary"],["IE","Ireland"],["IT","Italy"],
+    ["NL","Netherlands"],["NO","Norway"],["PL","Poland"],["PT","Portugal"],
+    ["RO","Romania"],["RS","Serbia"],["SE","Sweden"],["UA","Ukraine"],
+  ],
+  "Americas": [
+    ["AR","Argentina"],["BR","Brazil"],["CA","Canada"],["CL","Chile"],
+    ["CO","Colombia"],["MX","Mexico"],["PE","Peru"],["US","United States"],
+  ],
+  "Asia-Pacific": [
+    ["AU","Australia"],["BD","Bangladesh"],["CN","China"],["ID","Indonesia"],
+    ["IN","India"],["JP","Japan"],["KR","South Korea"],["MY","Malaysia"],
+    ["NZ","New Zealand"],["PH","Philippines"],["PK","Pakistan"],["SG","Singapore"],
+    ["TH","Thailand"],["VN","Vietnam"],
+  ],
+  "Africa & Middle East": [
+    ["EG","Egypt"],["KE","Kenya"],["MA","Morocco"],["NG","Nigeria"],
+    ["TR","Turkey"],["ZA","South Africa"],
+  ],
+};
 
-  const map = L.map('map', {
-    center: [52.1, 5.3],
-    zoom: 8,
-    zoomControl: false,
-    attributionControl: true
+const COLORS = {
+  line: '#ff6b35',
+  minor_line: '#ffd23f',
+  substation: '#00d4ff',
+  plant: '#00ff88',
+};
+
+const CC_TO_NAME = {};
+Object.values(COUNTRIES).flat().forEach(([cc, name]) => { CC_TO_NAME[cc] = name; });
+
+const map = L.map('map', {
+  center: [30, 10],
+  zoom: 3,
+  zoomControl: false,
+  attributionControl: true,
+  worldCopyJump: true,
+});
+
+L.control.zoom({ position: 'topright' }).addTo(map);
+
+const tileUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png';
+L.tileLayer(tileUrl, {
+  attribution: '© OpenStreetMap © CARTO',
+  maxZoom: 19,
+  subdomains: 'abcd',
+}).addTo(map);
+
+// Populate dropdown
+const select = document.getElementById('countrySelect');
+Object.entries(COUNTRIES).forEach(([region, countries]) => {
+  const optgroup = document.createElement('optgroup');
+  optgroup.label = region;
+  countries.forEach(([cc, name]) => {
+    const opt = document.createElement('option');
+    opt.value = cc;
+    opt.textContent = `${name} (${cc})`;
+    optgroup.appendChild(opt);
   });
+  select.appendChild(optgroup);
+});
 
-  L.control.zoom({ position: 'topright' }).addTo(map);
+let currentLayers = [];
 
-  // Mapbox dark basemap (falls back to CARTO if no token)
-  const tileUrl = MAPBOX_TOKEN
-    ? 'https://api.mapbox.com/styles/v1/mapbox/dark-v11/tiles/{z}/{x}/{y}?access_token=' + MAPBOX_TOKEN
-    : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+function clearMap() {
+  currentLayers.forEach(l => map.removeLayer(l));
+  currentLayers = [];
+  document.getElementById('legend').style.display = 'none';
+  document.getElementById('stats').style.display = 'none';
+}
 
-  L.tileLayer(tileUrl, {
-    attribution: '© OpenStreetMap' + (MAPBOX_TOKEN ? ' © Mapbox' : ' © CARTO'),
-    maxZoom: 19,
-    subdomains: MAPBOX_TOKEN ? undefined : 'abcd',
-    tileSize: MAPBOX_TOKEN ? 512 : 256,
-    zoomOffset: MAPBOX_TOKEN ? -1 : 0
-  }).addTo(map);
+function showLoading(text) {
+  document.getElementById('loadingText').textContent = text || 'Loading...';
+  document.getElementById('loading').style.display = 'block';
+}
+function hideLoading() {
+  document.getElementById('loading').style.display = 'none';
+}
 
-  fetch('power_lines_nl.geojson')
-    .then(r => r.json())
-    .then(data => {
-      document.getElementById('count').textContent = data.features.length.toLocaleString();
+function geojsonUrl(country, layer) {
+  // Use raw.githubusercontent.com for reliable access
+  const repo = 'lyralai/global-power-lines';
+  const branch = 'master';
+  const fileMap = {
+    line: `power_lines_${country.toLowerCase()}.geojson`,
+    minor_line: `power_minor_lines_${country.toLowerCase()}.geojson`,
+    substation: `power_substations_${country.toLowerCase()}.geojson`,
+    plant: `power_plants_${country.toLowerCase()}.geojson`,
+  };
+  const path = country === 'US'
+    ? `geojson/US/${fileMap[layer]}`
+    : `geojson/${country}/${fileMap[layer]}`;
+  return `https://raw.githubusercontent.com/${repo}/${branch}/${path}`;
+}
 
-      // Transmission lines — bright orange
-      const transmission = L.geoJSON(data, {
-        filter: f => f.properties.power_type === 'line',
-        style: { color: '#ff6b35', weight: 2, opacity: 0.85 },
-        onEachFeature: (feature, layer) => {
-          const p = feature.properties;
-          layer.bindPopup(
-            '<b>' + (p.name || 'Transmission Line') + '</b><br>' +
-            'Voltage: ' + (p.voltage || 'unknown') + ' kV<br>' +
-            'Operator: ' + (p.operator || 'unknown') + '<br>' +
-            'Cables: ' + (p.cables || 'unknown')
-          );
+async function loadCountry(country) {
+  clearLoading: clearMap();
+
+  const cc = country;
+  const name = CC_TO_NAME[cc] || cc;
+  showLoading(`Loading ${name}...`);
+
+  const layers = cc === 'US'
+    ? ['line', 'substation', 'plant']  // Skip minor_line for US (too big, use regions)
+    : ['line', 'minor_line', 'substation', 'plant'];
+
+  let totalFeatures = 0;
+  let loadedLayers = 0;
+
+  for (const layer of layers) {
+    const url = geojsonUrl(cc, layer);
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) {
+        console.warn(`${layer}: HTTP ${resp.status}`);
+        continue;
+      }
+      const data = await resp.json();
+      if (!data.features || data.features.length === 0) continue;
+
+      totalFeatures += data.features.length;
+      loadedLayers++;
+
+      const color = COLORS[layer];
+      let geoLayer;
+
+      if (layer === 'substation' || layer === 'plant') {
+        // Points
+        geoLayer = L.geoJSON(data, {
+          pointToLayer: (feat, latlng) => {
+            const marker = L.circleMarker(latlng, {
+              radius: layer === 'plant' ? 5 : 3,
+              fillColor: color,
+              color: color,
+              weight: 1,
+              opacity: 0.8,
+              fillOpacity: 0.7,
+            });
+            return marker;
+          },
+          onEachFeature: (feat, lyr) => {
+            const p = feat.properties || {};
+            if (layer === 'plant') {
+              lyr.bindPopup(
+                `<b>${p.name || 'Power Plant'}</b><br>` +
+                `Source: ${p.plant_source || 'unknown'}<br>` +
+                `Output: ${p.plant_output || 'unknown'}`
+              );
+            } else {
+              lyr.bindPopup(
+                `<b>${p.name || 'Substation'}</b><br>` +
+                `Type: ${p.substation_type || 'unknown'}<br>` +
+                `Voltage: ${p.voltage || 'unknown'}`
+              );
+            }
+          }
+        });
+      } else if (layer === 'line') {
+        geoLayer = L.geoJSON(data, {
+          style: { color, weight: 2, opacity: 0.85 },
+          onEachFeature: (feat, lyr) => {
+            const p = feat.properties || {};
+            lyr.bindPopup(
+              `<b>${p.name || 'Transmission Line'}</b><br>` +
+              `Voltage: ${p.voltage || 'unknown'} kV<br>` +
+              `Operator: ${p.operator || 'unknown'}`
+            );
+          }
+        });
+      } else {
+        // Minor lines — dimmer, only show when zoomed in
+        geoLayer = L.geoJSON(data, {
+          style: { color, weight: 0.8, opacity: 0.3 },
+        });
+        if (map.getZoom() < 9) {
+          // Don't add yet, store for zoom toggle
         }
-      }).addTo(map);
+      }
 
-      // Distribution lines — dim yellow, only when zoomed in
-      const distribution = L.geoJSON(data, {
-        filter: f => f.properties.power_type === 'minor_line',
-        style: { color: '#ffd23f', weight: 0.8, opacity: 0.35 }
-      }).addTo(map);
+      geoLayer.addTo(map);
+      currentLayers.push(geoLayer);
 
-      map.on('zoom', () => {
-        if (map.getZoom() < 11) {
-          if (map.hasLayer(distribution)) map.removeLayer(distribution);
-        } else {
-          if (!map.hasLayer(distribution)) map.addLayer(distribution);
-        }
-      });
-      if (map.getZoom() < 11) map.removeLayer(distribution);
+    } catch (e) {
+      console.warn(`Failed to load ${layer} for ${cc}:`, e.message);
+    }
+  }
+
+  hideLoading();
+
+  if (totalFeatures === 0) {
+    alert(`No data found for ${name}. Files may still be uploading.`);
+    return;
+  }
+
+  // Fit bounds to loaded data
+  if (currentLayers.length > 0) {
+    const bounds = L.latLngBounds([]);
+    currentLayers.forEach(l => {
+      try { bounds.extend(l.getBounds()); } catch(e) {}
     });
+    if (bounds.isValid()) {
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 8 });
+    }
+  }
+
+  // Update UI
+  document.getElementById('legend').style.display = 'block';
+  const stats = document.getElementById('stats');
+  stats.style.display = 'block';
+  document.getElementById('countryName').textContent = name;
+  document.getElementById('featureCount').textContent = totalFeatures.toLocaleString();
+  document.getElementById('dataSize').textContent = `${loadedLayers} layers`;
+}
+
+// Events
+select.addEventListener('change', (e) => {
+  if (e.target.value) {
+    loadCountry(e.target.value);
+  } else {
+    clearMap();
+  }
+});
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  select.value = '';
+  clearMap();
+});
+
+// Zoom toggle for minor lines
+map.on('zoomend', () => {
+  // Could add logic to show/hide minor lines based on zoom
+});
+
+hideLoading();
 </script>
 </body>
 </html>
