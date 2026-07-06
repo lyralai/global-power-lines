@@ -15,11 +15,11 @@ import sys
 import time
 
 GEOJSON_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'geojson')
-OUTPUT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'docs', 'data')
+OUTPUT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data')
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-BACKBONE_THRESHOLD = 380000   # 380 kV
-TRANSMISSION_THRESHOLD = 220000  # 220 kV
+EHV_THRESHOLD = 345000    # Extra High Voltage — 345 kV+ (covers US 345kV + EU 380kV)
+HV_THRESHOLD = 230000     # High Voltage — 230 kV+
 
 def parse_max_voltage(v):
     """Parse voltage string, return max value in volts."""
@@ -145,32 +145,32 @@ def main():
     ])
     print(f"Found {len(countries)} countries: {', '.join(countries)}")
     
-    # === BACKBONE: ≥380 kV only (strict, no missing voltage) ===
-    print(f"\n=== Building Backbone layer (≥380 kV, strict) ===")
-    backbone, bstats = build_layer(BACKBONE_THRESHOLD, include_missing=False, countries=countries)
-    backbone_path = os.path.join(OUTPUT_DIR, 'global_backbone.geojson')
-    print(f"\nWriting backbone: {len(backbone['features'])} features → {backbone_path}")
-    with open(backbone_path, 'w') as f:
-        json.dump(backbone, f, separators=(',', ':'))
-    backbone_size = os.path.getsize(backbone_path) / (1024*1024)
-    print(f"  Size: {backbone_size:.1f} MB")
+    # === EHV: ≥345 kV (strict, no missing voltage) ===
+    print(f"\n=== Building EHV layer (≥345 kV, strict) ===")
+    ehv, estats = build_layer(EHV_THRESHOLD, include_missing=False, countries=countries)
+    ehv_path = os.path.join(OUTPUT_DIR, 'global_ehv.geojson')
+    print(f"\nWriting EHV: {len(ehv['features'])} features → {ehv_path}")
+    with open(ehv_path, 'w') as f:
+        json.dump(ehv, f, separators=(',', ':'))
+    ehv_size = os.path.getsize(ehv_path) / (1024*1024)
+    print(f"  Size: {ehv_size:.1f} MB")
     
-    # === TRANSMISSION: ≥220 kV (no missing, strict) ===
-    print(f"\n=== Building Transmission layer (≥220 kV, strict) ===")
-    transmission, tstats = build_layer(TRANSMISSION_THRESHOLD, include_missing=False, countries=countries)
-    transmission_path = os.path.join(OUTPUT_DIR, 'global_transmission.geojson')
-    print(f"\nWriting transmission: {len(transmission['features'])} features → {transmission_path}")
-    with open(transmission_path, 'w') as f:
-        json.dump(transmission, f, separators=(',', ':'))
-    trans_size = os.path.getsize(transmission_path) / (1024*1024)
-    print(f"  Size: {trans_size:.1f} MB")
+    # === HV: ≥230 kV (no missing, strict) ===
+    print(f"\n=== Building HV layer (≥230 kV, strict) ===")
+    hv, hvstats = build_layer(HV_THRESHOLD, include_missing=False, countries=countries)
+    hv_path = os.path.join(OUTPUT_DIR, 'global_hv.geojson')
+    print(f"\nWriting HV: {len(hv['features'])} features → {hv_path}")
+    with open(hv_path, 'w') as f:
+        json.dump(hv, f, separators=(',', ':'))
+    hv_size = os.path.getsize(hv_path) / (1024*1024)
+    print(f"  Size: {hv_size:.1f} MB")
     
     elapsed = time.time() - start
     print(f"\n✅ Done in {elapsed:.1f}s")
-    print(f"   Backbone: {len(backbone['features']):,} features, {backbone_size:.1f} MB")
-    print(f"   Transmission: {len(transmission['features']):,} features, {trans_size:.1f} MB")
-    print(f"\n   Backbone by country:")
-    for cc, c in sorted(bstats['by_country'].items(), key=lambda x: -x[1]):
+    print(f"   EHV: {len(ehv['features']):,} features, {ehv_size:.1f} MB")
+    print(f"   HV:  {len(hv['features']):,} features, {hv_size:.1f} MB")
+    print(f"\n   EHV by country:")
+    for cc, c in sorted(estats['by_country'].items(), key=lambda x: -x[1]):
         if c > 0:
             print(f"     {cc}: {c:,}")
 
