@@ -51,10 +51,16 @@
 
     #legend {
       position: absolute; bottom: 20px; left: 20px; z-index: 1000;
-      background: rgba(0,0,0,0.85); border: 1px solid #333;
-      padding: 12px 16px; border-radius: 8px;
-      font-size: 12px; color: #ccc; line-height: 1.6;
+      background: rgba(0,0,0,0.9); border: 1px solid #333;
+      padding: 14px 16px; border-radius: 10px;
+      font-size: 12px; color: #ccc; line-height: 1.6; max-width: 320px;
     }
+    #legend h4 { margin: 0 0 8px; font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+    .country-pill {
+      display: inline-block; background: #222; color: #ddd; padding: 2px 7px; border-radius: 4px;
+      margin: 1px 3px 1px 0; cursor: pointer; font-size: 11px; transition: all 0.1s;
+    }
+    .country-pill:hover { background: #ff6b35; color: #000; }
     .legend-row { display: flex; align-items: center; gap: 8px; margin: 2px 0; }
     .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
     .legend-line { width: 24px; height: 2px; border-radius: 1px; }
@@ -93,11 +99,15 @@
 
 <div id="map"></div>
 
-<div id="legend" style="display:none;">
+<div id="legend">
+  <h4>Layers</h4>
   <div class="legend-row"><div class="legend-line" style="background:#ff6b35;"></div> Transmission lines</div>
   <div class="legend-row"><div class="legend-line" style="background:#ffd23f;opacity:0.5;"></div> Distribution (minor)</div>
   <div class="legend-row"><div class="legend-dot" style="background:#00d4ff;"></div> Substations</div>
   <div class="legend-row"><div class="legend-dot" style="background:#00ff88;"></div> Power plants</div>
+
+  <h4 style="margin-top:10px">Countries (click to load)</h4>
+  <div id="countryList" style="font-size:11px; max-height:120px; overflow-y:auto; line-height:1.8;"></div>
 </div>
 
 <div id="stats" style="display:none;">
@@ -170,6 +180,27 @@ Object.entries(COUNTRIES).forEach(([region, countries]) => {
     optgroup.appendChild(opt);
   });
   select.appendChild(optgroup);
+});
+
+// Populate visible country list in legend
+const countryListEl = document.getElementById('countryList');
+Object.entries(COUNTRIES).forEach(([region, countries]) => {
+  const regionLabel = document.createElement('div');
+  regionLabel.style.cssText = 'color:#666; font-size:10px; margin-top:4px;';
+  regionLabel.textContent = region;
+  countryListEl.appendChild(regionLabel);
+
+  countries.forEach(([cc, name]) => {
+    const pill = document.createElement('span');
+    pill.className = 'country-pill';
+    pill.textContent = cc;
+    pill.title = name;
+    pill.onclick = () => {
+      select.value = cc;
+      loadCountry(cc);
+    };
+    countryListEl.appendChild(pill);
+  });
 });
 
 let currentLayers = [];
