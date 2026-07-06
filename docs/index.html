@@ -319,7 +319,7 @@ async function loadBackbone() {
   if (backboneData) return backboneData;
   showLoading('Loading global backbone (≥380 kV)...');
   try {
-    const resp = await fetch('https://raw.githubusercontent.com/lyralai/global-power-lines/master/docs/data/global_backbone_simple.geojson');
+    const resp = await fetch('https://raw.githubusercontent.com/lyralai/global-power-lines/master/data/global_backbone_simple.geojson');
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     backboneData = await resp.json();
     hideLoading();
@@ -335,7 +335,7 @@ async function loadTransmission() {
   if (transmissionData) return transmissionData;
   showLoading('Loading global transmission (≥220 kV)...');
   try {
-    const resp = await fetch('https://raw.githubusercontent.com/lyralai/global-power-lines/master/docs/data/global_transmission_simple.geojson');
+    const resp = await fetch('https://raw.githubusercontent.com/lyralai/global-power-lines/master/data/global_transmission_simple.geojson');
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     transmissionData = await resp.json();
     hideLoading();

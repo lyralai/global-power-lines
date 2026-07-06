@@ -1,0 +1,502 @@
+{
+  "results": [
+    {
+      "country": "GB",
+      "status": "ok",
+      "layers": [
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "DE",
+      "status": "ok",
+      "layers": [
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "FR",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "ES",
+      "status": "ok",
+      "layers": [
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "IT",
+      "status": "ok",
+      "layers": [
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "PL",
+      "status": "ok",
+      "layers": [
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "NL",
+      "status": "ok",
+      "layers": [
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "SE",
+      "status": "ok",
+      "layers": [
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "NO",
+      "status": "ok",
+      "layers": [
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "FI",
+      "status": "ok",
+      "layers": [
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "PT",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "GR",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "AT",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "CH",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "BE",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "DK",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "IE",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "CZ",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "HU",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "RO",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "BG",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "HR",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "RS",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "UA",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "CA",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "MX",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "BR",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "AR",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "CL",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "CO",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "PE",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "JP",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "KR",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "AU",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "NZ",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "CN",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "IN",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "ID",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "TH",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "VN",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "MY",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "PH",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "PK",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "BD",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "SG",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "ZA",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "EG",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "TR",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "NG",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "KE",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    },
+    {
+      "country": "MA",
+      "status": "ok",
+      "layers": [
+        "line",
+        "minor_line",
+        "substation",
+        "plant"
+      ]
+    }
+  ],
+  "layers": [
+    "line",
+    "minor_line",
+    "substation",
+    "plant"
+  ]
+}

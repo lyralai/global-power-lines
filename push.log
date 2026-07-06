@@ -1,0 +1,16 @@
+Uploading LFS objects: 100% (4/4), 636 MB | 20 MB/s, done.
+remote: warning: See https://gh.io/lfs for more information.        
+remote: warning: File geojson/IN/power_lines_in.geojson is 67.02 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB        
+remote: warning: File geojson/NZ/power_minor_lines_nz.geojson is 54.94 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB        
+remote: warning: File geojson/PL/power_lines_pl.geojson is 83.47 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB        
+remote: warning: File geojson/DE/power_substations_de.geojson is 63.34 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB        
+remote: warning: File geojson/CA/power_lines_ca.geojson is 96.31 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB        
+remote: warning: File geojson/IT/power_lines_it.geojson is 51.37 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB        
+remote: warning: File geojson/US/regions/power_minor_lines_midwest_s.geojson is 68.23 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB        
+remote: warning: File geojson/CA/power_minor_lines_ca.geojson is 97.95 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB        
+remote: warning: File geojson/CZ/power_minor_lines_cz.geojson is 51.32 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB        
+remote: warning: File geojson/DE/power_lines_de.geojson is 94.16 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB        
+remote: warning: File geojson/ES/power_lines_es.geojson is 67.00 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB        
+remote: warning: GH001: Large files detected. You may want to try Git Large File Storage - https://git-lfs.github.com.        
+To https://github.com/lyralai/global-power-lines.git
+   7ff8b46..42bc4d0  master -> master
